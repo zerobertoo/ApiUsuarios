@@ -68,6 +68,7 @@ A API expõe os seguintes endpoints para o gerenciamento de usuários:
 3.  **Execute as Migrações (Criação do Banco de Dados):**
     O banco de dados SQLite (`usuarios.db`) será criado na primeira execução. Para garantir que o esquema esteja atualizado:
     ```bash
+    dotnet ef migrations add InitialCreate
     dotnet ef database update
     ```
 
