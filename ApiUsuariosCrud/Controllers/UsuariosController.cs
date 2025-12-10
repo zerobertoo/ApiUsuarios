@@ -1,7 +1,6 @@
-using ApiUsuarios.Models;
-using ApiUsuariosCrud.Data;
+using ApiUsuarios.DTOs;
+using ApiUsuarios.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiUsuarios.Controllers;
 
@@ -9,159 +8,107 @@ namespace ApiUsuarios.Controllers;
 [Route("api/[controller]")]
 public class UsuariosController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUsuarioService _usuarioService;
     private readonly ILogger<UsuariosController> _logger;
 
-    public UsuariosController(AppDbContext context,
-        ILogger<UsuariosController> logger)
+    public UsuariosController(IUsuarioService usuarioService, ILogger<UsuariosController> logger)
     {
-        _context = context;
+        _usuarioService = usuarioService;
         _logger = logger;
     }
 
     /// <summary>
-    /// Retorna todos os usu·rios
+    /// Retorna todos os usu√°rios
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+    public async Task<ActionResult<IEnumerable<UsuarioDTO>>> GetUsuarios()
     {
-        _logger.LogInformation("GET: Recuperando todos os usu·rios");
-        var usuarios = await _context.Usuarios.ToListAsync();
+        _logger.LogInformation("GET: Recuperando todos os usu√°rios");
+        var usuarios = await _usuarioService.GetAllUsuariosAsync();
         return Ok(usuarios);
     }
 
     /// <summary>
-    /// Retorna apenas usu·rios ativos
+    /// Retorna apenas usu√°rios ativos
     /// </summary>
     [HttpGet("ativos")]
-    public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuariosAtivos()
+    public async Task<ActionResult<IEnumerable<UsuarioDTO>>> GetUsuariosAtivos()
     {
-        _logger.LogInformation("GET: Recuperando usu·rios ativos");
-        var usuarios = await _context.Usuarios
-            .Where(u => u.Ativo)
-            .ToListAsync();
+        _logger.LogInformation("GET: Recuperando usu√°rios ativos");
+        var usuarios = await _usuarioService.GetActiveUsuariosAsync();
         return Ok(usuarios);
     }
 
     /// <summary>
-    /// Retorna um usu·rio especÌfico pelo ID
+    /// Retorna um usu√°rio espec√≠fico pelo ID
     /// </summary>
     [HttpGet("{id}")]
-    public async Task<ActionResult<Usuario>> GetUsuario(int id)
+    public async Task<ActionResult<UsuarioDTO>> GetUsuario(int id)
     {
-        var usuario = await _context.Usuarios.FindAsync(id);
+        var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
         if (usuario == null)
         {
-            _logger.LogWarning("GET: Usu·rio {Id} n„o encontrado", id);
-            return NotFound(new { mensagem = "Usu·rio n„o encontrado" });
+            return NotFound(new { mensagem = "Usu√°rio n√£o encontrado" });
         }
 
         return Ok(usuario);
     }
 
     /// <summary>
-    /// Cria um novo usu·rio
+    /// Cria um novo usu√°rio
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<Usuario>> PostUsuario(
-        [FromBody] CreateUsuarioRequest request)
+    public async Task<ActionResult<UsuarioDTO>> PostUsuario([FromBody] CreateUsuarioDTO createDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        // Verificar se email j· existe
-        if (await _context.Usuarios.AnyAsync(u => u.Email == request.Email))
+        var (usuarioDto, error) = await _usuarioService.CreateUsuarioAsync(createDto);
+
+        if (error != null)
         {
-            _logger.LogWarning("POST: Email {Email} j· cadastrado", request.Email);
-            return BadRequest(new { mensagem = "Email j· cadastrado" });
+            return BadRequest(new { mensagem = error });
         }
 
-        var usuario = new Usuario
-        {
-            Nome = request.Nome,
-            Email = request.Email,
-            Telefone = request.Telefone,
-            DataCadastro = DateTime.UtcNow,
-            Ativo = true
-        };
-
-        _context.Usuarios.Add(usuario);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("POST: Novo usu·rio criado com ID {Id}", usuario.Id);
-        return CreatedAtAction(nameof(GetUsuario), new { id = usuario.Id }, usuario);
+        return CreatedAtAction(nameof(GetUsuario), new { id = usuarioDto!.Id }, usuarioDto);
     }
 
     /// <summary>
-    /// Atualiza um usu·rio existente
+    /// Atualiza um usu√°rio existente
     /// </summary>
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutUsuario(int id,
-        [FromBody] UpdateUsuarioRequest request)
+    public async Task<IActionResult> PutUsuario(int id, [FromBody] UpdateUsuarioDTO updateDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var usuario = await _context.Usuarios.FindAsync(id);
-        if (usuario == null)
+        var (usuarioDto, error) = await _usuarioService.UpdateUsuarioAsync(id, updateDto);
+
+        if (error == "Usu√°rio n√£o encontrado")
         {
-            _logger.LogWarning("PUT: Usu·rio {Id} n„o encontrado", id);
-            return NotFound(new { mensagem = "Usu·rio n„o encontrado" });
+            return NotFound(new { mensagem = error });
+        }
+        else if (error != null)
+        {
+            return BadRequest(new { mensagem = error });
         }
 
-        // Verificar se novo email j· existe (de outro usu·rio)
-        if (request.Email != usuario.Email &&
-            await _context.Usuarios.AnyAsync(u => u.Email == request.Email))
-        {
-            _logger.LogWarning("PUT: Email {Email} j· cadastrado", request.Email);
-            return BadRequest(new { mensagem = "Email j· cadastrado" });
-        }
-
-        usuario.Nome = request.Nome ?? usuario.Nome;
-        usuario.Email = request.Email ?? usuario.Email;
-        usuario.Telefone = request.Telefone ?? usuario.Telefone;
-        usuario.Ativo = request.Ativo ?? usuario.Ativo;
-        usuario.DataAtualizacao = DateTime.UtcNow;
-
-        _context.Usuarios.Update(usuario);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("PUT: Usu·rio {Id} atualizado", id);
-        return Ok(usuario);
+        return Ok(usuarioDto);
     }
 
     /// <summary>
-    /// Deleta um usu·rio
+    /// Deleta um usu√°rio
     /// </summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUsuario(int id)
     {
-        var usuario = await _context.Usuarios.FindAsync(id);
-        if (usuario == null)
+        var (success, error) = await _usuarioService.DeleteUsuarioAsync(id);
+
+        if (!success)
         {
-            _logger.LogWarning("DELETE: Usu·rio {Id} n„o encontrado", id);
-            return NotFound(new { mensagem = "Usu·rio n„o encontrado" });
+            return NotFound(new { mensagem = error });
         }
 
-        _context.Usuarios.Remove(usuario);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("DELETE: Usu·rio {Id} removido", id);
-        return Ok(new { mensagem = "Usu·rio removido com sucesso" });
+        return Ok(new { mensagem = "Usu√°rio removido com sucesso" });
     }
-}
-
-public class CreateUsuarioRequest
-{
-    public string Nome { get; set; } = null!;
-    public string Email { get; set; } = null!;
-    public string? Telefone { get; set; }
-}
-
-public class UpdateUsuarioRequest
-{
-    public string? Nome { get; set; }
-    public string? Email { get; set; }
-    public string? Telefone { get; set; }
-    public bool? Ativo { get; set; }
 }

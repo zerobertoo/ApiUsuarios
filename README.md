@@ -57,6 +57,7 @@ dotnet restore
 ### 3. Criar o banco via migrations
 
 ```bash
+dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
 

@@ -1,5 +1,9 @@
 using ApiUsuariosCrud.Data;
 using Microsoft.EntityFrameworkCore;
+using ApiUsuarios.Interfaces;
+using ApiUsuarios.Repositories;
+using ApiUsuarios.Services;
+using ApiUsuarios.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +13,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=usuarios.db"));
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(UsuarioProfile).Assembly);
+
+// Adicionando Repositório e Serviço
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
