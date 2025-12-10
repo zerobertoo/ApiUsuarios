@@ -2,7 +2,7 @@
 
 ## 🎯 Status do Projeto
 
-[![Status: Concluído](https://img.shields.io/badge/Status-Concluído-brightgreen.svg)](https://github.com/seu-usuario/ApiUsuarios)
+[![Status: Concluído](https://img.shields.io/badge/Status-Concluído-brightgreen.svg)](https://github.com/zerobertoo/ApiUsuarios)
 [![Tecnologia: .NET 10](https://img.shields.io/badge/Tecnologia-.NET%2010-512BD4.svg)](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 [![Licença: MIT](https://img.shields.io/badge/Licença-MIT-blue.svg)](LICENSE.txt)
 
