@@ -1,5 +1,4 @@
 using ApiUsuariosCrud.Data;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +27,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-
 
 app.Run();
