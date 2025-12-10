@@ -1,101 +1,94 @@
-# API de Gerenciamento de Usuários | .NET 10 + EF Core + SQLite
+# ApiUsuarios - API RESTful de Gerenciamento de Usuários
 
-API REST construída com .NET 10, Entity Framework Core e SQLite, com foco em boas práticas, organização, documentação e arquitetura simples. Este projeto faz parte do meu portfólio e demonstra habilidades reais com back-end, integrações e construção de APIs RESTful.
+## 🎯 Status do Projeto
 
-## 🚀 Tecnologias Utilizadas
+[![Status: Concluído](https://img.shields.io/badge/Status-Concluído-brightgreen.svg)](https://github.com/seu-usuario/ApiUsuarios)
+[![Tecnologia: .NET 10](https://img.shields.io/badge/Tecnologia-.NET%2010-512BD4.svg)](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+[![Licença: MIT](https://img.shields.io/badge/Licença-MIT-blue.svg)](LICENSE.txt)
 
-- .NET 10
-- ASP.NET Core Web API
-- Entity Framework Core
-- SQLite
-- Swagger / OpenAPI
-- LINQ
-- Migrations (EF)
+Este projeto foi desenvolvido como um **item de portfólio** para demonstrar proficiência na criação de APIs RESTful robustas e bem estruturadas utilizando o ecossistema .NET.
 
-## 📌 Funcionalidades Implementadas
+## 📝 Descrição
 
-- ✔️ Criar usuários (POST)
-- ✔️ Listar todos os usuários (GET)
-- ✔️ Buscar usuário por ID (GET /{id})
-- ✔️ Listar apenas usuários ativos (GET /ativos)
-- ✔️ Atualizar usuário (PUT)
-- ✔️ Remover usuário (DELETE)
-- ✔️ Validação simples (nome/email obrigatórios)
-- ✔️ Seed inicial com dados fixos
-- ✔️ Documentação completa via Swagger
+A **ApiUsuarios** é uma API RESTful simples e eficiente para realizar operações CRUD (Create, Read, Update, Delete) em registros de usuários. O foco principal deste projeto é a aplicação de **boas práticas de desenvolvimento de software**, como a separação de responsabilidades e a utilização de padrões de projeto, tornando o código mais limpo, testável e de fácil manutenção.
 
-## 📁 Estrutura do Projeto
+## 🛠️ Tecnologias Utilizadas
 
-```
-ApiUsuarios/
-├── Controllers/
-│   └── UsuariosController.cs
-├── Data/
-│   └── AppDbContext.cs
-├── Models/
-│   └── Usuario.cs
-├── usuarios.db (ignorado pelo git)
-├── Program.cs
-└── README.md
-```
+| Categoria | Tecnologia | Versão | Descrição |
+| :--- | :--- | :--- | :--- |
+| **Framework** | .NET 10 (ASP.NET Core) | 10.0 | Plataforma principal para construção da API. |
+| **ORM** | Entity Framework Core | 8.0.6 | Mapeamento Objeto-Relacional. |
+| **Banco de Dados** | SQLite | 8.0.6 | Banco de dados leve e embutido para desenvolvimento. |
+| **Mapeamento** | AutoMapper | 12.0.1 | Simplifica o mapeamento entre Modelos e DTOs. |
+| **Padrões** | Repository e Service Layer | - | Implementação de arquitetura limpa e desacoplada. |
+| **Documentação** | Swagger/OpenAPI | 6.6.2 | Documentação interativa dos endpoints da API. |
 
-## 🧪 Como Executar o Projeto
+## 🏗️ Arquitetura e Padrões de Projeto
 
-### 1. Clonar o repositório
+O projeto foi refatorado para seguir uma arquitetura em camadas, promovendo a **Separação de Responsabilidades (SoC)** e o **Princípio da Responsabilidade Única (SRP)**.
 
-```bash
-git clone https://github.com/SEU-USUARIO/api-usuarios-dotnet.git
-cd api-usuarios-dotnet
-```
+1.  **Controller (Apresentação):** Responsável por receber as requisições HTTP, validar o `ModelState` e retornar as respostas. Delega toda a lógica de negócio para a camada de Serviço.
+2.  **Service Layer (Regras de Negócio):** Contém a lógica de negócio da aplicação (ex: validação de e-mail duplicado, regras de ativação/inativação). Utiliza o Repositório para interagir com os dados.
+3.  **Repository Pattern (Acesso a Dados):** Abstrai a lógica de acesso ao banco de dados (Entity Framework Core). O Serviço interage com o Repositório através de uma interface (`IUsuarioRepository`), garantindo o desacoplamento.
+4.  **DTOs (Data Transfer Objects):** Utilizados para transferir dados entre as camadas e a interface externa (API), garantindo que apenas os dados necessários sejam expostos ou recebidos.
 
-### 2. Restaurar dependências
+## 🚀 Funcionalidades (Endpoints)
 
-```bash
-dotnet restore
-```
+A API expõe os seguintes endpoints para o gerenciamento de usuários:
 
-### 3. Criar o banco via migrations
+| Método | Endpoint | Descrição | DTO de Entrada | DTO de Saída |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/usuarios` | Retorna a lista completa de todos os usuários. | - | `UsuarioDTO[]` |
+| `GET` | `/api/usuarios/ativos` | Retorna a lista apenas de usuários ativos. | - | `UsuarioDTO[]` |
+| `GET` | `/api/usuarios/{id}` | Retorna um usuário específico pelo ID. | - | `UsuarioDTO` |
+| `POST` | `/api/usuarios` | Cria um novo usuário. | `CreateUsuarioDTO` | `UsuarioDTO` |
+| `PUT` | `/api/usuarios/{id}` | Atualiza um usuário existente. | `UpdateUsuarioDTO` | `UsuarioDTO` |
+| `DELETE` | `/api/usuarios/{id}` | Remove um usuário pelo ID. | - | `200 OK` |
 
-```bash
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-```
+## ⚙️ Como Executar o Projeto
 
-### 4. Rodar o servidor
+### Pré-requisitos
 
-```bash
-dotnet run
-```
+*   [.NET 10 ](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+*   Um editor de código (Visual Studio Code, Visual Studio, Rider)
 
-### 5. Acessar a documentação (Swagger)
+### Passos
 
-Abra no navegador: `https://localhost:7XXX/swagger`
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/zerobertoo/ApiUsuarios.git
+    cd ApiUsuarios/ApiUsuariosCrud
+    ```
 
-## 🔗 Endpoints Principais
+2.  **Restaure as dependências:**
+    ```bash
+    dotnet restore
+    ```
 
-| Verbo  | Endpoint               | Descrição    |
-| ------ | ---------------------- | ------------ |
-| GET    | `/api/usuarios`        | Lista todos  |
-| GET    | `/api/usuarios/{id}`   | Busca por ID |
-| GET    | `/api/usuarios/ativos` | Lista ativos |
-| POST   | `/api/usuarios`        | Cria usuário |
-| PUT    | `/api/usuarios/{id}`   | Atualiza     |
-| DELETE | `/api/usuarios/{id}`   | Remove       |
+3.  **Execute as Migrações (Criação do Banco de Dados):**
+    O banco de dados SQLite (`usuarios.db`) será criado na primeira execução. Para garantir que o esquema esteja atualizado:
+    ```bash
+    dotnet ef database update
+    ```
 
-## 🧠 Boas Práticas Utilizadas
+4.  **Execute a Aplicação:**
+    ```bash
+    dotnet run
+    ```
 
-- Seed com valores estáticos (evita erros em migrations)
-- Tratamento de erros claro (BadRequest, NotFound)
-- Controller enxuto e objetivo
-- Código limpo e nomeado de forma clara
-- Padrão REST
-- Separação entre Model, Data e Controller
+A API estará disponível em `http://localhost:5000` (ou porta configurada no `launchSettings.json`). A documentação interativa do Swagger estará acessível em `http://localhost:5000/swagger`.
 
-## 📜 Licença
+## 🌟 Melhorias e Otimizações Aplicadas
 
-Este projeto está licenciado sob a Licença MIT. Você pode usar, estudar, modificar e distribuir como quiser.
+As seguintes melhorias foram implementadas para transformar o projeto em um ativo de portfólio de alta qualidade:
 
-## 👤 Contato
+*   **Atualização de Framework:** Migração do projeto para o **.NET 10**, a versão LTS mais recente, garantindo performance e suporte.
+*   **Implementação de DTOs:** Separação dos modelos de domínio (`Usuario`) dos modelos de transferência de dados (`CreateUsuarioDTO`, `UpdateUsuarioDTO`, `UsuarioDTO`), melhorando a segurança e o controle de dados.
+*   **Uso de AutoMapper:** Configuração do AutoMapper para automatizar o mapeamento entre DTOs e Modelos, reduzindo código *boilerplate* e erros manuais.
+*   **Padrão de Repositório e Serviço:** Introdução das camadas de Serviço e Repositório, isolando a lógica de negócio e o acesso a dados, o que facilita a manutenção e a escrita de testes unitários.
+*   **Injeção de Dependência (DI):** Uso consistente de DI para todas as novas camadas (`IUsuarioService`, `IUsuarioRepository`), promovendo o baixo acoplamento.
+*   **Tratamento de Erros:** Melhoria no retorno de erros (ex: "Email já cadastrado", "Usuário não encontrado") com mensagens claras e códigos de status HTTP apropriados.
 
-- **LinkedIn:** https://linkedin.com/in/joserobertoo
-- **Email:** euzerobertoo@gmail.com
+---
+
+Feito com ❤️ por **zerobertoo**
